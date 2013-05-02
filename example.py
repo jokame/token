@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#coding=utf-8
 import Token
 import json
 import sys
@@ -14,11 +15,8 @@ path = "telcel.json"
 tweets = [json.loads(line) for line in open(path)]
 Vector=Token.VectorTexto()
 for tw in tweets:
-#	u=u+1
-#	if u==300:
-#		break
-	t = tw['text']
-	
+	t = str(tw['text'])
+	t.decode('utf-8')
 	Vector.mete(t)
 while len(Vector.BD) > 0:
 	Vector.saca()
