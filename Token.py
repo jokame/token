@@ -1,60 +1,53 @@
 #coding=utf-8
-from datetime import datetime, date, timedelta
-import nltk
-
+import nltk, time
+from threading import Thread
 class VectorTexto(object):
 	"""docstring for VectorTexto"""
 	def __init__(self):
 		super(VectorTexto, self).__init__()
+		self.token=nltk.RegexpTokenizer(u"[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\xe1\xe9\xed\xf3\xfa\xc1\xc9\xcd\xd3\xda\xf1\xd1\xfc\xdc']+")
+		#Cadena de caracteres admitidos en Tokenizer
 		self.BD=[]
-		self.hora=datetime.now()
-		self.delta=timedelta(milliseconds=500)
-		self.token=nltk.RegexpTokenizer('[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\á\é\í\ó\ú\Á\É\Í\Ó\Ú\ñ\Ñ\'\ü\Ü]+')
-		self.cadena=""
-		self.cont=0
-		
+		self.ultsaca=time.time()
+		self.cadena=u''
+		self.sigue=True
+		self.TredSacador=Thread(target=self.saca)
+		self.TredSacador.start()
+		self.max=1000 #Máximo número de palabras a escribir en Words.txt por ciclo
 	def mete(self,t):
 		q=self.token.tokenize(t)
 		self.BD=self.BD+q
-		self.saca()
-
-		#print q
+		
 
 	def saca(self):
-		m=datetime.now()
-		if m > (self.hora+self.delta) and len(self.BD)>0:
-			print m 
-			print len(self.BD)
-			u=1
-			self.cadena=''
-			for s in self.BD:
-				self.cadena=self.cadena+s+'|'
-				if u==1200:
-					print 'perro'
-					break
-				u=u+1
-			while u != 1:
-				del self.BD[0]
-				u=u-1
-			Words=open('Words'+str(self.cont)+'.txt','w')
-			Words.write(self.cadena.decode('utf-8',errors='ignore'))
-			Words.close
-			self.hora=m
-			self.cont=self.cont+1
+		tant=time.clock()
+		while self.sigue==True:
+			time.sleep(0.002)
+			tsaca=time.clock()
+			trans=tsaca-tant #tiempo transcurrido desde última escritura en Words
+			if self.BD!=[] and ((tsaca%1 >0.49 and tsaca%1 <0.51) or tsaca%1>0.99 or tsaca%1<0.01) and trans>0.48:
 
-
+				u=1
+				self.cadena=u''
+				for s in self.BD:
+					self.cadena=self.cadena+s+u'|'
+					if u==1200:
+						break
+					u=u+1
+				while u != 1:
+					del self.BD[0]
+					u=u-1
+				with open('Words.txt','w') as Words:
+					Words.write(self.cadena.encode('utf-8'))
+					Words.close()
+				tant=tsaca
+	def muere(self):
+		self.sigue=False
 
 	
 if __name__ == '__main__':
-	m=VectorTexto()
-	m.mete("carro cáca mañana si.po es, ver|.dad , .* a $900")
-	print m.BD
-
-
-
-	
-	
-	
-	
-
-		
+	Vector=VectorTexto()
+	Vector.mete(u"casco patada colchón partido ñacañaca Güerita o'h")
+	while Vector.BD!=[]:
+		time.sleep(0.1)
+	Vector.muere()
